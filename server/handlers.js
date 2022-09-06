@@ -94,6 +94,7 @@ const updateCategories = async (req, res) => {
         await db.collection("savinginfo").updateOne({"category":"EmergencyFund"}, {"$set": {"amount":0 }});
         await db.collection("savinginfo").updateOne({"category":"Home"}, {"$set": {"amount":0 }});
         await db.collection("history").deleteMany({})
+        // await db.collection("savinginfo").deleteMany({})
         // console.log(category, "these are the categories")
         //if the category has already been selected..add to the category? if not create the category?
         res.status(200).json({status:200, data:category})   
@@ -103,6 +104,7 @@ const updateCategories = async (req, res) => {
         res.status(404).json({status:404, message :"Sorry there has been an error!"})
 
     }
+    
     client.close()
 }
 
