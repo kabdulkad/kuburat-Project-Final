@@ -3,38 +3,30 @@ require("dotenv").config();
 
 const { MONGO_URI } = process.env;
 const options = {useNewUrlParser: true, useUnifiedTopology: true,};
-//find 
-//use req.body
+
 //function gets all the data from the form
 const getData = async (req, res) => {
     const client = new MongoClient(MONGO_URI, options)
     const newClient = req.body.inputData
-    // console.log(newClient, "this is the data")
 
-    //if cate already exist update it , if not create it 
-    //.patch to update
+//if category already exist update it , if not create it 
+
 try {
     await client.connect();
-    // console.log("connected")
     const db = client.db("database")
     const findCategory = await db.collection("savinginfo").findOne({category: newClient.category} )
-   
 
-    // console.log(findCategory, "this is the cat")
+
 //first value is the filter, the set changes the value
-//ANOTHER collection to store note
+//ANOTHER collection to store previous data ("history")
 if(findCategory) {
-console.log(parseInt(newClient.amount)  + parseInt(findCategory.amount))
+
 
     await db.collection("savinginfo").updateOne({category: newClient.category}, {"$set": {"amount":parseInt(newClient.amount)  + parseInt(findCategory.amount) }})
     
+
+    await db.collection("history").insertOne({category:newClient.category, amount: parseInt(newClient.amount) , notes:newClient.notes, date: new Date(), email:req.body.email}) //setting amount and cat
     
-    // console.log(req.body.email)
-
-    // if(req.body.email === "abdulkad@ualberta.ca") {
-
-        await db.collection("history").insertOne({category:newClient.category, amount: parseInt(newClient.amount) , notes:newClient.notes, date: new Date(), email:req.body.email}) //setting amount and cat
-    // }
     return res.status(200).json({status:200, message:"this category has already been choosen"})
 
 } else {
@@ -47,7 +39,6 @@ console.log(parseInt(newClient.amount)  + parseInt(findCategory.amount))
 
 } catch(err) {
 
-    // console.log(err)
     res.status(400).json({status :400 , data:{} , message:"There has been an error"})
 }
 
@@ -81,7 +72,7 @@ const getCategories = async (req, res) => {
     client.close()
 }
 
-//function update category if it has already been picked previously
+//function update category if it has already been picked previously + reset all data to initial value once reset button is clicked on
 const updateCategories = async (req, res) => {
     const client = new MongoClient(MONGO_URI,options)
 
@@ -111,7 +102,6 @@ const updateCategories = async (req, res) => {
 
 //getting previous saving info
 const getpreviousSavingData = async (req, res) =>{
-    console.log(req.body)
     const client = new MongoClient(MONGO_URI, options)
     
     try {
